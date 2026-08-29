@@ -842,7 +842,8 @@ span.t-frente{display:inline-flex;align-items:center;gap:5px;padding:3px 9px;bac
 }
 .avisos-clave input:focus{border-color:var(--azurita-claro);outline:none}
 .avisos-clave button{padding:6px 9px}
-.avisos-tabla{width:100%;border-collapse:collapse;font-size:12.5px}
+#avisosCuerpo{overflow-x:auto;margin:0 -4px;padding:0 4px}
+.avisos-tabla{width:100%;min-width:820px;border-collapse:collapse;font-size:12.5px}
 .avisos-tabla th{
   text-align:left;font-family:var(--mono);font-size:10px;letter-spacing:.05em;text-transform:uppercase;
   color:var(--tinta-tenue);border-bottom:1px solid var(--roca-honda);padding:5px 7px;
@@ -850,8 +851,8 @@ span.t-frente{display:inline-flex;align-items:center;gap:5px;padding:3px 9px;bac
 .avisos-tabla td{border-bottom:1px solid var(--roca);padding:9px 7px;vertical-align:top;color:var(--tinta)}
 .aviso-tarea b{display:block;font-family:var(--serif);font-size:13.5px}
 .aviso-tarea small{font-family:var(--mono);font-size:10px;color:var(--tinta-tenue)}
-.aviso-info{font-size:12px;color:var(--tinta-tenue);max-width:260px;line-height:1.5}
-.aviso-contacto{font-family:var(--mono);font-size:11px;white-space:nowrap}
+.aviso-info{font-size:12px;color:var(--tinta-tenue);min-width:160px;max-width:260px;line-height:1.5}
+.aviso-contacto{font-family:var(--mono);font-size:11px;overflow-wrap:anywhere;max-width:200px}
 .aviso-contacto a{color:var(--azurita);text-decoration:none}
 .aviso-contacto a:hover{text-decoration:underline}
 .aviso-mensaje{min-width:240px}
@@ -1005,6 +1006,27 @@ span.t-frente{display:inline-flex;align-items:center;gap:5px;padding:3px 9px;bac
 @media (prefers-reduced-motion:reduce){
   *{transition:none !important}
 }
+
+/* ----- Lente institucional ----- */
+.lente-barra{display:flex;flex-wrap:wrap;gap:6px;margin:10px 0 0}
+.lente-barra.oculto{display:none}
+.lente-chip{border:1px solid currentColor;border-radius:999px;padding:3px 13px;font-size:12px;
+  cursor:pointer;background:transparent;color:inherit;opacity:.62;font:inherit;font-size:12px;line-height:1.4}
+.lente-chip:hover{opacity:.88}
+.lente-chip.activa{opacity:1;box-shadow:inset 0 0 0 1.5px currentColor}
+.t-inst{border-style:dashed}
+.inst-gente{display:flex;flex-direction:column;gap:4px;margin-top:8px}
+.inst-persona{display:flex;align-items:center;gap:7px;min-width:0}
+.inst-punto{width:9px;height:9px;border-radius:50%;flex:0 0 auto}
+.inst-persona input[type=text]{flex:1 1 auto;min-width:0;background:transparent;border:none;
+  border-bottom:1px dashed transparent;color:inherit;font:inherit;font-size:12px;padding:1px 0}
+.inst-persona input[type=text]:focus{outline:none;border-bottom-color:currentColor}
+.inst-cargo{font-size:10px;opacity:.6;white-space:nowrap;flex:0 0 auto}
+.inst-mudanza{flex:0 0 auto;margin-left:auto;font:inherit;font-size:10px;background:transparent;
+  color:inherit;border:1px solid currentColor;border-radius:6px;opacity:.65;max-width:42%}
+.inst-mudanza:hover{opacity:1}
+.inst-nadie{font-size:11px;opacity:.55;font-style:italic;margin:6px 0 0}
+.inst-sumar{margin-top:8px;font-size:11px;padding:4px 9px}
 </style>
 </head>
 <body>
@@ -1023,14 +1045,15 @@ span.t-frente{display:inline-flex;align-items:center;gap:5px;padding:3px 9px;bac
     <button class="pestana activa" id="tabTablero">Tablero</button>
     <button class="pestana" id="tabHorario">Horario</button>
     <button class="pestana" id="tabCalendario">Calendario</button>
-    <button class="pestana" id="tabFrentes">Frentes</button>
-    <button class="pestana" id="tabResponsables">Responsables</button>
+    <button class="pestana" id="tabFrentes">Frentes y Responsables</button>
     <button class="pestana" id="tabDesempeno">Desempeño</button>
     <button class="pestana" id="tabGantt">Gantt</button>
     <button class="pestana" id="tabBitacora">Bitácora</button>
     <button class="pestana" id="tabInforme">Informe</button>
     <button class="pestana" id="tabAvisos">Avisos</button>
   </nav>
+
+  <div class="lente-barra oculto" id="lenteBarra"></div>
 
   <div class="ensaye vista-tablero" id="ensaye"></div>
 
@@ -1084,11 +1107,20 @@ span.t-frente{display:inline-flex;align-items:center;gap:5px;padding:3px 9px;bac
   </div>
 </section>
 
-<section class="frentes-envoltura vista-responsables oculto" id="vistaResponsables">
+<section class="frentes-envoltura vista-frentes oculto" id="vistaInstituciones">
   <div class="gf-marco">
-    <p class="gf-titulo">Responsables</p>
-    <p class="gf-nota">Primero el cargo, luego sus gentes: cada cargo se crea con nombre y color propios, y dentro de él se dan de alta los responsables, que visten el color del cargo y pueden mudarse de uno a otro. Asígnalos desde cada tarjeta o evento con el sumador «+»; cada ficha acumula su carga viva, sus cierres asentados en la bitácora y su cronometría.</p>
-    <div id="gestionResponsables"></div>
+    <p class="gf-titulo">Instituciones</p>
+    <p class="gf-nota">La institución es una lente, no una partición: el estado sigue siendo uno y la barra bajo las pestañas lo filtra entero (tablero, agenda, Gantt, informe, avisos y bitácora). Para tarjetas, eventos y cursos es exclusiva (una casa o ninguna, y lo sin casa equivale a Personal); las personas, en cambio, visten casas plurales con chips «+» y ×, siendo la primera la principal. Cada casa incrusta a su gente con ficha completa: nombre, teléfono, correo, cargo, casa y relación jerárquica «responde a», más sus cifras de carga, cierres y cronometría; el «responde a» admite varios superiores a la vez (chips con «+» y ×, siempre con casa común y sin lazos circulares); «+ Agregar persona» la crea ya adscrita y despedirla retira su nombre de tarjetas y eventos sin tocar la crónica escrita. El bloque fijo «Autónomos» reúne a quienes portan ese rasgo declarado (conmutable en la ficha; el alta en el bloque lo viste de nacimiento) más a quien carece de toda casa, que es el estado por defecto: el autónomo con casas comparece a la vez allí y en cada una de ellas, como una sola ficha varias veces dibujada. El vínculo jerárquico exige casa común vínculo a vínculo: al vaciarse la intersección de casas entre alguien y uno de sus superiores, ese lazo se corta solo, conservando los demás. Eliminar una institución no borra nada: sus elementos y su gente pasan a lo personal.</p>
+    <div id="gestionInstituciones"></div>
+    <button class="agregar-frente" id="agregarInstitucion">+ Agregar institución</button>
+  </div>
+</section>
+
+<section class="frentes-envoltura vista-frentes oculto" id="vistaCargos">
+  <div class="gf-marco">
+    <p class="gf-titulo">Cargos</p>
+    <p class="gf-nota">El cargo es entidad propia: nombre y color que visten a todos los suyos. Aquí se crean, renombran y colorean; a cada persona se le visten sus cargos (uno o varios) desde su propia ficha, dentro de su institución; el primero es el principal y le presta su color. Eliminar un cargo lo retira de quienes lo llevan, conservando sus demás cargos y su color vigente.</p>
+    <div id="gestionCargos"></div>
     <button class="agregar-frente" id="agregarCargo">+ Agregar cargo</button>
   </div>
 </section>
@@ -1114,14 +1146,10 @@ span.t-frente{display:inline-flex;align-items:center;gap:5px;padding:3px 9px;bac
 <section class="informe-envoltura vista-avisos oculto" id="vistaAvisos">
   <div class="informe-marco">
     <p class="gf-titulo">Avisos a responsables</p>
-    <p class="gf-nota">Toda tarea pendiente con su información, su responsable y sus señas, lista para notificar. «Reunir información» refresca la tabla desde el estado vivo; «Redactar con IA» compone los mensajes vacantes mediante la API de Anthropic con la clave que ingreses abajo, que reside únicamente en este navegador y jamás viaja en los Recuerdos. Cada mensaje es editable, copiable y despachable por correo.</p>
+    <p class="gf-nota">Toda tarea pendiente con su información, su responsable y sus señas, lista para notificar. «Reunir información» refresca la tabla desde el estado vivo y «Redactar vacantes» compone localmente, con los datos de cada fila, los mensajes que estén vacíos: saludo por nombre, qué falta, plazo si lo hay y despedida del firmante. Cada mensaje es editable, copiable y despachable por correo.</p>
     <div class="avisos-mando">
       <button id="avisosReunir" title="Reconstruye la tabla con las tareas pendientes del estado actual">⟳ Reunir información</button>
-      <button id="avisosRedactar" title="Compone con IA los mensajes que estén vacíos">✎ Redactar con IA</button>
-      <span class="avisos-clave">
-        <input type="password" id="claveIA" placeholder="Clave API de Anthropic (sk-ant-…)" autocomplete="off">
-        <button id="verClave" title="Mostrar u ocultar la clave">👁</button>
-      </span>
+      <button id="avisosRedactar" title="Compone desde la plantilla local los mensajes que estén vacíos">✎ Redactar vacantes</button>
     </div>
     <div id="avisosCuerpo"></div>
   </div>
@@ -1184,7 +1212,7 @@ span.t-frente{display:inline-flex;align-items:center;gap:5px;padding:3px 9px;bac
 <script>
 "use strict";
 
-const CLAVE = "tablero.frentes.v5";
+const CLAVE = "tablero.frentes.v9";
 
 const DIAS = ["Lun", "Mar", "Mié", "Jue", "Vie", "Sáb", "Dom"];
 
@@ -1204,11 +1232,13 @@ function frentesIniciales() {
 
 function tableroInicial() {
   return {
-    version: 5,
+    version: 9,
     usuario: "",
     ganttZoom: "anual",
     pestana: "tablero",
     frentes: frentesIniciales(),
+    instituciones: [],
+    lente: "",
     horario: { grupos: [] },
     calendario: { eventos: [], vista: "" },
     columnas: [
@@ -1347,6 +1377,7 @@ function barrerCiclos() {
             id: uid(),
             titulo: t.titulo,
             cuerpo: t.cuerpo,
+            inst: t.inst || "",
             frente: t.frente,
             frentes: frentesDe(t).slice(),
             pct: t.pct,
@@ -1439,13 +1470,28 @@ function respsDe(x) {
   return Array.isArray(x.resps) && x.resps.length ? x.resps : ["nadie"];
 }
 
+// Superiores de una persona: el plural manda y el singular legado lo espeja.
+function superioresDe(rr) {
+  if (Array.isArray(rr.superiores)) return rr.superiores;
+  return rr.superior ? [rr.superior] : [];
+}
+
+function refrescarMando(rr) {
+  const ids = [...new Set(superioresDe(rr).filter(id => (estado.responsables || []).some(x => x.id === id)))];
+  rr.superiores = ids;
+  rr.superior = ids[0] || "";
+}
+
+// ¿Manda a sobre b? Recorrido hacia arriba por el grafo plural de mando.
 function mandaSobre(a, b) {
-  let cursor = respPorId(b).superior;
+  const cola = superioresDe(respPorId(b)).slice();
   const vistos = new Set();
-  while (cursor && !vistos.has(cursor)) {
+  while (cola.length) {
+    const cursor = cola.pop();
     if (cursor === a) return true;
+    if (vistos.has(cursor)) continue;
     vistos.add(cursor);
-    cursor = respPorId(cursor).superior;
+    superioresDe(respPorId(cursor)).forEach(s => cola.push(s));
   }
   return false;
 }
@@ -1458,16 +1504,259 @@ const frentePorId = id =>
   estado.frentes.find(f => f.id === "otro") ||
   estado.frentes[0];
 
+/* ---------------- Lente institucional ---------------- */
+
+// La institución es exclusiva (una o ninguna por elemento) y actúa como
+// lente: filtra las vistas sin fragmentar jamás el estado. La lente vacía
+// muestra todo; "@personal" muestra solo lo sin institución.
+function instDe(x) { return typeof x.inst === "string" ? x.inst : ""; }
+
+const instPorId = id => (estado.instituciones || []).find(nst => nst.id === id) || null;
+
+function pasaLente(x) {
+  const l = estado.lente || "";
+  if (!l) return true;
+  if (l === "@personal") return !instDe(x);
+  return instDe(x) === l;
+}
+
+function tarjetasLente(col) { return col.tarjetas.filter(pasaLente); }
+
+function bitacoraLente() { return (estado.bitacora || []).filter(pasaLente); }
+
+// La institución que hereda todo elemento nacido bajo una lente concreta.
+function lenteInstNueva() {
+  return estado.lente && estado.lente !== "@personal" ? estado.lente : "";
+}
+
+function dibujarLente() {
+  const barra = document.getElementById("lenteBarra");
+  if (!barra) return;
+  barra.innerHTML = "";
+  if (!(estado.instituciones || []).length) { barra.classList.add("oculto"); return; }
+  barra.classList.remove("oculto");
+  const opciones = [{ id: "", nombre: "Todas", color: "" }]
+    .concat(estado.instituciones.map(nst => ({ id: nst.id, nombre: nst.nombre, color: nst.color })))
+    .concat([{ id: "@personal", nombre: "Personal", color: "" }]);
+  opciones.forEach(o => {
+    const chip = document.createElement("button");
+    chip.type = "button";
+    chip.className = "lente-chip" + ((estado.lente || "") === o.id ? " activa" : "");
+    chip.textContent = o.nombre;
+    if (o.color) chip.style.color = claro(o.color, 0.32);
+    chip.title = o.id === ""
+      ? "Sin lente: el estado completo a la vista"
+      : o.id === "@personal"
+        ? "Solo lo que no pertenece a institución alguna"
+        : "Lente institucional: filtra tablero, agenda, Gantt, informe, avisos y bitácora";
+    chip.addEventListener("click", () => {
+      estado.lente = (estado.lente || "") === o.id ? "" : o.id;
+      guardar(); dibujar();
+    });
+    barra.appendChild(chip);
+  });
+}
+
+// Casas de una persona: el plural manda y el singular legado lo espeja;
+// la primera es la principal. La autonomía es rasgo declarado: el autónomo
+// comparece en su bloque aunque vista casas.
+function instsDe(rr) {
+  if (Array.isArray(rr.insts)) return rr.insts;
+  return rr.inst ? [rr.inst] : [];
+}
+
+function refrescarCasa(rr) {
+  const ids = [...new Set(instsDe(rr).filter(id => (estado.instituciones || []).some(n => n.id === id)))];
+  rr.insts = ids;
+  rr.inst = ids[0] || "";
+}
+
+// El mando exige casa común: comparten alguna, o carecen ambos de todas.
+function mismaCasaJerarquica(a, b) {
+  const ca = instsDe(a), cb = instsDe(b);
+  if (!ca.length && !cb.length) return true;
+  return ca.some(x => cb.includes(x));
+}
+
+// Cargos de una persona: el plural manda y el singular legado lo espeja;
+// el primero es el principal y presta su color. El texto r.cargo se deriva.
+function cargosDe(r) {
+  if (Array.isArray(r.cargoIds)) return r.cargoIds;
+  return r.cargoId ? [r.cargoId] : [];
+}
+
+function tieneCargo(r, cid) { return cargosDe(r).includes(cid); }
+
+function refrescarCargo(r) {
+  const ids = [...new Set(cargosDe(r).filter(id => (estado.cargos || []).some(c => c.id === id)))];
+  r.cargoIds = ids;
+  r.cargoId = ids[0] || "";
+  if (ids.length) {
+    r.cargo = ids.map(id => estado.cargos.find(c => c.id === id).nombre).join(" / ");
+    r.color = estado.cargos.find(c => c.id === ids[0]).color;
+  } else if (r.id !== "nadie") {
+    r.cargo = "";
+  }
+}
+
+// El vínculo jerárquico no cruza de institución: toda cadena de mando que
+// quede tendida entre casas distintas se corta en silencio.
+function podarJerarquiaCruzada() {
+  (estado.responsables || []).forEach(rr => {
+    rr.superiores = superioresDe(rr).filter(sid => {
+      const sup = (estado.responsables || []).find(x => x.id === sid);
+      return sup && mismaCasaJerarquica(sup, rr);
+    });
+    rr.superior = rr.superiores[0] || "";
+  });
+}
+
+function cuentaInst(id) {
+  let n = 0;
+  estado.columnas.forEach(c => c.tarjetas.forEach(t => { if (t.inst === id) n++; }));
+  estado.calendario.eventos.forEach(e => { if (e.inst === id) n++; });
+  (estado.horario.grupos || []).forEach(g => { if (g.inst === id) n++; });
+  (estado.responsables || []).forEach(rr => { if (instsDe(rr).includes(id)) n++; });
+  return n;
+}
+
+function dibujarInstituciones() {
+  const lista = document.getElementById("gestionInstituciones");
+  if (!lista) return;
+  lista.innerHTML = "";
+
+  // Una casa: institución real, o el bloque fijo de Autónomos (nst nulo),
+  // que reúne a quienes portan el rasgo declarado más a quien carece de toda
+  // casa; el autónomo con casas comparece aquí y en cada una de ellas, como
+  // la misma ficha varias veces dibujada.
+  const bloqueCasa = nst => {
+    const fija = !nst;
+    const casaId = fija ? "" : nst.id;
+
+    const bloque = document.createElement("div");
+    bloque.className = "cargo-bloque" + (fija ? " sin-cargo" : "");
+    if (!fija) bloque.style.setProperty("--acento", claro(nst.color, 0.3));
+
+    const cabeza = document.createElement("div");
+    cabeza.className = "cargo-cabeza";
+
+    if (fija) {
+      const rotulo = document.createElement("span");
+      rotulo.className = "cargo-nombre-fijo";
+      rotulo.textContent = "Autónomos";
+      rotulo.title = "Bloque fijo por defecto: autónomos declarados y quienes no pertenecen a casa alguna";
+      cabeza.appendChild(rotulo);
+    } else {
+      const color = document.createElement("input");
+      color.type = "color";
+      color.value = nst.color;
+      color.title = "Color de la institución";
+      color.addEventListener("input", () => {
+        bloque.style.setProperty("--acento", claro(color.value, 0.3));
+      });
+      color.addEventListener("change", () => { nst.color = color.value; guardar(); dibujar(); });
+
+      const nombre = document.createElement("input");
+      nombre.type = "text";
+      nombre.className = "cargo-nombre";
+      nombre.value = nst.nombre;
+      nombre.title = "Nombre de la institución";
+      nombre.addEventListener("change", () => {
+        nst.nombre = nombre.value.trim() || "Institución";
+        guardar(); dibujar();
+      });
+
+      cabeza.append(color, nombre);
+    }
+
+    const propios = (estado.responsables || []).filter(rr => rr.id !== "nadie"
+      && (fija ? (rr.autonomo || !instsDe(rr).length) : instsDe(rr).includes(casaId)));
+
+    const censo = document.createElement("span");
+    censo.className = "cargo-censo";
+    censo.textContent = propios.length + (propios.length === 1 ? " persona" : " personas")
+      + (fija ? "" : " · " + cuentaInst(nst.id) + " elemento(s) bajo la lente");
+    cabeza.appendChild(censo);
+
+    const sumar = document.createElement("button");
+    sumar.className = "cargo-sumar";
+    sumar.textContent = "+ Agregar persona";
+    sumar.title = fija ? "Dar de alta una persona sin institución" : "Dar de alta una persona ya adscrita a " + nst.nombre;
+    sumar.addEventListener("click", () => {
+      const usados = new Set(estado.responsables.map(x => x.color));
+      const color = PALETA.find(c => !usados.has(c)) || PALETA[estado.responsables.length % PALETA.length];
+      const nueva = { id: uid(), nombre: "Responsable", color, cargo: "", cargoId: "", cargoIds: [], contacto: "", correo: "", superior: "", superiores: [], inst: casaId, insts: fija ? [] : [casaId], autonomo: fija };
+      const iNadie = estado.responsables.findIndex(x => x.id === "nadie");
+      estado.responsables.splice(iNadie === -1 ? estado.responsables.length : iNadie, 0, nueva);
+      guardar(); dibujar();
+    });
+    cabeza.appendChild(sumar);
+
+    if (!fija) {
+      const quitar = document.createElement("button");
+      quitar.className = "quitar";
+      quitar.textContent = "×";
+      quitar.title = "Eliminar institución: sus elementos y su gente pasan a lo personal, nada se borra";
+      quitar.addEventListener("click", () => {
+        const ligados = cuentaInst(nst.id);
+        confirmar("¿Eliminar la institución «" + nst.nombre + "»? Sus " + ligados + " elemento(s) y persona(s) pasarán a lo personal; ninguno se borra.", "Eliminar").then(ok => {
+          if (!ok) return;
+          estado.columnas.forEach(c => c.tarjetas.forEach(t => { if (t.inst === nst.id) t.inst = ""; }));
+          estado.calendario.eventos.forEach(e => { if (e.inst === nst.id) e.inst = ""; });
+          (estado.horario.grupos || []).forEach(g => { if (g.inst === nst.id) g.inst = ""; });
+          (estado.responsables || []).forEach(rr => {
+            if (!instsDe(rr).includes(nst.id)) return;
+            rr.insts = instsDe(rr).filter(x => x !== nst.id);
+            refrescarCasa(rr);
+          });
+          (estado.bitacora || []).forEach(b => { if (b.inst === nst.id) b.inst = ""; });
+          podarJerarquiaCruzada();
+          if (estado.lente === nst.id) estado.lente = "";
+          estado.instituciones = estado.instituciones.filter(x => x.id !== nst.id);
+          guardar(); dibujar();
+          sello("Institución «" + nst.nombre + "» eliminada; sus elementos quedaron como personales y su gente conserva sus demás casas");
+        });
+      });
+      cabeza.appendChild(quitar);
+    }
+
+    bloque.appendChild(cabeza);
+
+    const fichas = document.createElement("div");
+    fichas.className = "cargo-fichas";
+    propios.forEach(rr => fichas.appendChild(fichaResponsable(rr)));
+    if (fija) {
+      const nadie = (estado.responsables || []).find(rr => rr.id === "nadie");
+      if (nadie) fichas.appendChild(fichaResponsable(nadie));
+    }
+    if (!fichas.children.length) {
+      const nada = document.createElement("p");
+      nada.className = "inf-nada";
+      nada.textContent = fija ? "Sin autónomos ni gente sin casa por ahora." : "Sin personas adscritas todavía.";
+      fichas.appendChild(nada);
+    }
+    bloque.appendChild(fichas);
+    return bloque;
+  };
+
+  (estado.instituciones || []).forEach(nst => lista.appendChild(bloqueCasa(nst)));
+  lista.appendChild(bloqueCasa(null));
+}
+
 /* ---------------- Persistencia ---------------- */
 
 function cargar() {
   try {
     const crudo = localStorage.getItem(CLAVE)
+      || localStorage.getItem("tablero.frentes.v8")
+      || localStorage.getItem("tablero.frentes.v7")
+      || localStorage.getItem("tablero.frentes.v6")
+      || localStorage.getItem("tablero.frentes.v5")
       || localStorage.getItem("tablero.frentes.v4")
       || localStorage.getItem("tablero.frentes.v3")
       || localStorage.getItem("tablero.frentes.v2")
       || localStorage.getItem("tablero.frentes.v1");
-    if (!crudo) return tableroInicial();
+    if (!crudo) { const fresco = tableroInicial(); normalizar(fresco); return fresco; }
     const dato = JSON.parse(crudo);
     if (!dato || !Array.isArray(dato.columnas) || !dato.columnas.length) return tableroInicial();
     normalizar(dato);
@@ -1510,18 +1799,32 @@ function normalizar(dato) {
   }
   const idsResp = new Set(dato.responsables.map(r => r.id));
   dato.responsables.forEach(r => {
-    if (r.id === "nadie" || !idsResp.has(r.superior) || r.superior === r.id || r.superior === "nadie") r.superior = "";
+    // Plural con legado: superiores manda; a falta suya, el superior singular.
+    const crudosS = (Array.isArray(r.superiores) ? r.superiores : [r.superior])
+      .filter(x => typeof x === "string" && x && idsResp.has(x) && x !== r.id && x !== "nadie");
+    r.superiores = r.id === "nadie" ? [] : [...new Set(crudosS)];
   });
-  // Romper ciclos jerárquicos: quien cierre el lazo pierde a su superior.
-  dato.responsables.forEach(r => {
-    const vistos = new Set([r.id]);
-    let cursor = r.superior;
-    while (cursor) {
-      if (vistos.has(cursor)) { r.superior = ""; break; }
+  // Romper ciclos: el grafo de mando debe quedar acíclico; todo vínculo que
+  // cierre un lazo hacia arriba se descarta en su orden de llegada.
+  const arriba = new Map(dato.responsables.map(r => [r.id, []]));
+  const alcanzaArriba = (desde, meta) => {
+    const cola = [desde], vistos = new Set();
+    while (cola.length) {
+      const cursor = cola.pop();
+      if (cursor === meta) return true;
+      if (vistos.has(cursor)) continue;
       vistos.add(cursor);
-      const sup = dato.responsables.find(x => x.id === cursor);
-      cursor = sup ? sup.superior : "";
+      (arriba.get(cursor) || []).forEach(s => cola.push(s));
     }
+    return false;
+  };
+  dato.responsables.forEach(r => {
+    r.superiores = r.superiores.filter(s => {
+      if (alcanzaArriba(s, r.id)) return false;
+      arriba.get(r.id).push(s);
+      return true;
+    });
+    r.superior = r.superiores[0] || "";
   });
   dato.avisos = dato.avisos && typeof dato.avisos === "object" && !Array.isArray(dato.avisos) ? dato.avisos : {};
   const idsAviso = new Set();
@@ -1541,8 +1844,11 @@ function normalizar(dato) {
   });
   const cargoIds = new Set(dato.cargos.map(c2 => c2.id));
   dato.responsables.forEach(r => {
-    r.cargoId = typeof r.cargoId === "string" && cargoIds.has(r.cargoId) ? r.cargoId : "";
-    if (!r.cargoId && r.id !== "nadie" && typeof r.cargo === "string" && r.cargo.trim()) {
+    // Plural con legado: cargoIds manda; a falta suya, el cargoId singular.
+    const crudosC = (Array.isArray(r.cargoIds) ? r.cargoIds : [r.cargoId])
+      .filter(x => typeof x === "string" && cargoIds.has(x));
+    r.cargoIds = [...new Set(crudosC)];
+    if (!r.cargoIds.length && r.id !== "nadie" && typeof r.cargo === "string" && r.cargo.trim()) {
       const clave = r.cargo.trim().toLowerCase();
       let c2 = dato.cargos.find(x => x.nombre.trim().toLowerCase() === clave);
       if (!c2) {
@@ -1550,12 +1856,12 @@ function normalizar(dato) {
         dato.cargos.push(c2);
         cargoIds.add(c2.id);
       }
-      r.cargoId = c2.id;
+      r.cargoIds = [c2.id];
     }
-    if (r.cargoId) {
-      const c2 = dato.cargos.find(x => x.id === r.cargoId);
-      r.cargo = c2.nombre;
-      r.color = c2.color;
+    r.cargoId = r.cargoIds[0] || "";
+    if (r.cargoIds.length) {
+      r.cargo = r.cargoIds.map(id => dato.cargos.find(x => x.id === id).nombre).join(" / ");
+      r.color = dato.cargos.find(x => x.id === r.cargoIds[0]).color;
     } else if (r.id !== "nadie") {
       r.cargo = "";
     }
@@ -1691,6 +1997,7 @@ function normalizar(dato) {
       color: /^#[0-9A-Fa-f]{6}$/.test(e.color || "") ? e.color : "#2E5C8A",
       repetirHasta: /^\d{4}-\d{2}-\d{2}$/.test(e.repetirHasta || "") ? e.repetirHasta : "",
       grupo: typeof e.grupo === "string" ? e.grupo : "",
+      inst: typeof e.inst === "string" ? e.inst : "",
       dia: [1, 2, 3, 4, 5, 6, 7].includes(Number(e.dia)) ? Number(e.dia) : 0,
       frentes: (Array.isArray(e.frentes) ? e.frentes : []).filter(x => valido.has(x) && x !== "otro"),
       resps: (Array.isArray(e.resps) ? e.resps : []).filter(x => validoResp.has(x) && x !== "nadie")
@@ -1704,7 +2011,43 @@ function normalizar(dato) {
   dato.version = 5;
   dato.usuario = typeof dato.usuario === "string" ? dato.usuario.trim() : "";
   dato.ganttZoom = ["semanal", "mensual", "trimestral", "semestral", "anual"].includes(dato.ganttZoom) ? dato.ganttZoom : "anual";
-  dato.pestana = ["tablero", "horario", "calendario", "frentes", "responsables", "desempeno", "gantt", "bitacora", "informe", "avisos"].includes(dato.pestana) ? dato.pestana : "tablero";
+  if (dato.pestana === "responsables") dato.pestana = "frentes";
+  dato.pestana = ["tablero", "horario", "calendario", "frentes", "desempeno", "gantt", "bitacora", "informe", "avisos"].includes(dato.pestana) ? dato.pestana : "tablero";
+
+  // v6: la institución como lente transversal y exclusiva de todo el estado.
+  if (!Array.isArray(dato.instituciones)) dato.instituciones = [];
+  dato.instituciones = dato.instituciones.filter(x => x && typeof x === "object");
+  dato.instituciones.forEach((nst, i) => {
+    nst.id = nst.id || uid();
+    nst.nombre = typeof nst.nombre === "string" && nst.nombre.trim() ? nst.nombre.trim() : "Institución";
+    nst.color = /^#[0-9A-Fa-f]{6}$/.test(nst.color || "") ? nst.color : PALETA[(i + 2) % PALETA.length];
+  });
+  const validoInst = new Set(dato.instituciones.map(nst => nst.id));
+  const ligarInst = x => { x.inst = typeof x.inst === "string" && validoInst.has(x.inst) ? x.inst : ""; };
+  dato.columnas.forEach(c => c.tarjetas.forEach(ligarInst));
+  dato.calendario.eventos.forEach(ligarInst);
+  dato.horario.grupos.forEach(ligarInst);
+  // v8: las personas visten casas plurales (insts manda, inst espeja a la
+  // primera) y portan la autonomía como rasgo declarado, no derivado.
+  dato.responsables.forEach(rr => {
+    const crudasI = (Array.isArray(rr.insts) ? rr.insts : [rr.inst])
+      .filter(x => typeof x === "string" && validoInst.has(x));
+    rr.insts = rr.id === "nadie" ? [] : [...new Set(crudasI)];
+    rr.inst = rr.insts[0] || "";
+    rr.autonomo = rr.id === "nadie" ? false : !!rr.autonomo;
+  });
+  // El mando exige casa común, vínculo a vínculo: intersección no vacía,
+  // o ninguna casa en ambos extremos.
+  dato.responsables.forEach(rr => {
+    rr.superiores = (rr.superiores || []).filter(sid => {
+      const sup = dato.responsables.find(x => x.id === sid);
+      return sup && (sup.insts.some(x => rr.insts.includes(x)) || (!sup.insts.length && !rr.insts.length));
+    });
+    rr.superior = rr.superiores[0] || "";
+  });
+  dato.bitacora.forEach(b => { if (typeof b.inst !== "string" || !validoInst.has(b.inst)) b.inst = typeof b.inst === "string" ? "" : b.inst; });
+  dato.lente = dato.lente === "@personal" || validoInst.has(dato.lente) ? dato.lente : "";
+  dato.version = 9;
 }
 
 function sanear(t, valido, validoR) {
@@ -1720,6 +2063,7 @@ function sanear(t, valido, validoR) {
     cuerpo: typeof t.cuerpo === "string" ? t.cuerpo : "",
     frente: frentes[0],
     frentes: frentes,
+    inst: typeof t.inst === "string" ? t.inst : "",
     resps: (() => {
       const crudosR = (Array.isArray(t.resps) ? t.resps : []).filter(x => admitidosResp.has(x));
       const listaR = crudosR.length ? [...new Set(crudosR)] : ["nadie"];
@@ -1814,6 +2158,7 @@ function asentarBitacora(t, col) {
     cierre: hoyLargo(),
     titulo: t.titulo || "(sin título)",
     columna: col ? col.nombre : "",
+    inst: instDe(t),
     cuerpo: t.cuerpo || "",
     frentes: frentesDe(t).map(fid => {
       const f = frentePorId(fid);
@@ -1906,11 +2251,11 @@ window.addEventListener("resize", () => { actualizarEspejoTablero(); actualizarE
 // Pinta únicamente la vista activa: las demás se reconstruyen al entrar
 // (verPestana), de modo que ninguna se muestra jamás desactualizada.
 function dibujar() {
+  dibujarLente();
   switch (estado.pestana) {
     case "horario":      dibujarPanelGrupos(); dibujarHorario(); break;
     case "calendario":   dibujarCalendario(); break;
-    case "frentes":      dibujarPanelFrentes(); break;
-    case "responsables": dibujarResponsables(); break;
+    case "frentes":      dibujarPanelFrentes(); dibujarInstituciones(); dibujarCargos(); break;
     case "desempeno":    dibujarDesempeno(); break;
     case "gantt":        dibujarGantt(); break;
     case "bitacora":     dibujarBitacora(); break;
@@ -1929,8 +2274,9 @@ function dibujar() {
 }
 
 function dibujarColumna(col) {
-  const n = col.tarjetas.length;
-  const media = n ? Math.round(col.tarjetas.reduce((a, t) => a + pctDe(t), 0) / n) : 0;
+  const visibles = tarjetasLente(col);
+  const n = visibles.length;
+  const media = n ? Math.round(visibles.reduce((a, t) => a + pctDe(t), 0) / n) : 0;
 
   const el = document.createElement("section");
   el.className = "columna" + (col.urgente ? " urgente" : "") + (col.urgente && n ? " encendida" : "");
@@ -2007,8 +2353,8 @@ function dibujarColumna(col) {
     borrar.textContent = "×";
     borrar.title = "Eliminar columna";
     borrar.addEventListener("click", () => {
-      const seguir = n
-        ? confirmar("La columna «" + col.nombre + "» tiene " + n + " tarjeta(s). ¿Eliminar de todos modos?", "Eliminar")
+      const seguir = col.tarjetas.length
+        ? confirmar("La columna «" + col.nombre + "» tiene " + col.tarjetas.length + " tarjeta(s). ¿Eliminar de todos modos?", "Eliminar")
         : Promise.resolve(true);
       seguir.then(ok => {
         if (!ok) return;
@@ -2046,12 +2392,14 @@ function dibujarColumna(col) {
   if (n === 0) {
     const vacio = document.createElement("div");
     vacio.className = "vacio";
-    vacio.textContent = col.urgente
-      ? "las incumplidas de los ciclos caerán aquí"
-      : "Agrega una tarjeta o trae una con las flechas";
+    vacio.textContent = col.tarjetas.length
+      ? col.tarjetas.length + " tarjeta(s) fuera de la lente activa"
+      : (col.urgente
+        ? "las incumplidas de los ciclos caerán aquí"
+        : "Agrega una tarjeta o trae una con las flechas");
     lista.appendChild(vacio);
   } else {
-    let orden = col.tarjetas;
+    let orden = visibles;
     if (col.ciclica) {
       const hoy0 = new Date();
       hoy0.setHours(0, 0, 0, 0);
@@ -2064,7 +2412,7 @@ function dibujarColumna(col) {
         const tipo = t.cicloPeriodo || col.cicloTipo || "semana";
         return [dias, -(pesoPeriodo[tipo] || 1)];
       };
-      orden = col.tarjetas
+      orden = visibles
         .map((t, i) => ({ t, i, k: clave(t) }))
         .sort((a, b) => a.k[0] - b.k[0] || a.k[1] - b.k[1] || a.i - b.i)
         .map(par => par.t);
@@ -2080,7 +2428,7 @@ function dibujarColumna(col) {
     const agregar = document.createElement("button");
     agregar.textContent = "+ Nueva tarjeta";
     agregar.addEventListener("click", () => {
-      const t = sanear({ frente: "otro", pct: 0, fecha: hoyCorto() });
+      const t = sanear({ frente: "otro", inst: lenteInstNueva(), pct: 0, fecha: hoyCorto() });
       if (col.ciclica) bautizarCorte(col, t);
       col.tarjetas.push(t);
       guardar(); dibujar();
@@ -2224,6 +2572,27 @@ function dibujarTarjeta(t, col) {
     });
     frenteFila.appendChild(sumar);
   }
+  if ((estado.instituciones || []).length) {
+    const chipI = document.createElement("select");
+    chipI.className = "t-frente t-inst";
+    chipI.title = "Institución de la tarjeta: exclusiva, una o ninguna; vacía equivale a Personal";
+    const opP = document.createElement("option");
+    opP.value = "";
+    opP.textContent = "Personal";
+    chipI.appendChild(opP);
+    estado.instituciones.forEach(nst => {
+      const op = document.createElement("option");
+      op.value = nst.id;
+      op.textContent = nst.nombre;
+      chipI.appendChild(op);
+    });
+    chipI.value = instPorId(t.inst) ? t.inst : "";
+    const instAct = instPorId(t.inst);
+    if (instAct) chipI.style.color = claro(instAct.color, 0.32);
+    chipI.addEventListener("click", ev => ev.stopPropagation());
+    chipI.addEventListener("change", () => { t.inst = chipI.value; guardar(); dibujar(); });
+    if (!col.archivo) frenteFila.appendChild(chipI);
+  }
   cuerpo.after(frenteFila);
 
   const respFila = document.createElement("div");
@@ -2240,7 +2609,7 @@ function dibujarTarjeta(t, col) {
         + (rr.cargo ? " · " + rr.cargo : "")
         + (rr.contacto ? " · ☎ " + rr.contacto : "")
         + (rr.correo ? " · ✉ " + rr.correo : "")
-        + (rr.superior ? " · responde a " + respPorId(rr.superior).nombre : "");
+        + (superioresDe(rr).length ? " · responde a " + superioresDe(rr).map(sid => respPorId(sid).nombre).join(" y ") : "");
     chipR.appendChild(document.createTextNode(rr.nombre));
     if (rid !== "nadie") {
       const quitarR = document.createElement("button");
@@ -2571,6 +2940,7 @@ function duplicar(t, col) {
     id: idCopia,
     titulo: t.titulo ? t.titulo + " (copia)" : "",
     cuerpo: t.cuerpo,
+    inst: t.inst || "",
     frente: t.frente,
     frentes: frentesDe(t).slice(),
     pct: t.pct,
@@ -2858,8 +3228,9 @@ function refrescarCifras() {
   estado.columnas.forEach(col => {
     const el = tablero.querySelector('[data-col="' + col.id + '"]');
     if (!el) return;
-    const n = col.tarjetas.length;
-    const media = n ? Math.round(col.tarjetas.reduce((a, t) => a + pctDe(t), 0) / n) : 0;
+    const visibles = tarjetasLente(col);
+    const n = visibles.length;
+    const media = n ? Math.round(visibles.reduce((a, t) => a + pctDe(t), 0) / n) : 0;
     el.querySelector(".col-cifra").textContent = n + (n === 1 ? " tarjeta" : " tarjetas") + (n ? " · " + media + "%" : "");
     const relleno = el.querySelector(".col-relleno");
     if (relleno) relleno.style.width = media + "%";
@@ -2869,8 +3240,8 @@ function refrescarCifras() {
 
 function dibujarEnsaye() {
   const caja = document.getElementById("ensaye");
-  const abiertas = estado.columnas.filter(c => !c.archivo).flatMap(c => c.tarjetas);
-  const cerradas = estado.bitacora;
+  const abiertas = estado.columnas.filter(c => !c.archivo).flatMap(c => tarjetasLente(c));
+  const cerradas = bitacoraLente();
   caja.innerHTML = "";
 
   if (!abiertas.length && !cerradas.length) {
@@ -2916,9 +3287,9 @@ function dibujarEnsaye() {
 // merman este último tramo en proporción a la carga activa del frente.
 function estadisticasFrente(fid) {
   let activas = 0, cerradas = 0, criticas = 0, atrasadas = 0, reincidencias = 0, suma = 0;
-  cerradas = estado.bitacora.filter(b => b.frentes.some(f => f.id === fid)).length;
+  cerradas = bitacoraLente().filter(b => b.frentes.some(f => f.id === fid)).length;
   estado.columnas.forEach(c => c.tarjetas.forEach(t => {
-    if (!tieneFrente(t, fid)) return;
+    if (!pasaLente(t) || !tieneFrente(t, fid)) return;
     activas++;
     suma += pctDe(t);
     if (c.urgente) {
@@ -3113,7 +3484,7 @@ function dibujarPanelFrentes() {
     dato("Atrasadas", e.atrasadas, e.atrasadas > 0);
     dato("Avance", e.avance === null ? "—" : e.avance + "%");
     dato("Reincid.", e.reincidencias, e.reincidencias > 0);
-    const entradasF = estado.bitacora.filter(b => b.frentes.some(x => x.id === f.id));
+    const entradasF = bitacoraLente().filter(b => b.frentes.some(x => x.id === f.id));
     const tiempoF = entradasF.reduce((a, b) => a + (b.tiempoMs || 0), 0);
     const retrasosF = entradasF.map(b => b.retrasoMs).filter(v => v !== null && v !== undefined);
     const retrasoMedio = retrasosF.length ? retrasosF.reduce((a, v) => a + v, 0) / retrasosF.length : null;
@@ -3287,36 +3658,12 @@ document.getElementById("avisosReunir").addEventListener("click", () => {
   sello("Información reunida desde el estado vivo del tablero");
 });
 
-document.getElementById("avisosRedactar").addEventListener("click", async () => {
+document.getElementById("avisosRedactar").addEventListener("click", () => {
   const filas = filasAviso().filter(f => !(estado.avisos[f.t.id] || "").trim());
   if (!filas.length) { sello("Nada vacante: todos los pendientes tienen ya su mensaje"); return; }
-  const boton = document.getElementById("avisosRedactar");
-  boton.disabled = true;
-  let hechos = 0, fallo = "";
-  for (const fila of filas) {
-    try {
-      const texto = await llamarIA(promptAviso(fila));
-      estado.avisos[fila.t.id] = texto;
-      hechos++;
-    } catch (err) { fallo = err.message; break; }
-  }
+  filas.forEach(fila => { estado.avisos[fila.t.id] = plantillaAviso(fila); });
   guardar(); dibujarAvisos();
-  boton.disabled = false;
-  sello(fallo
-    ? (hechos ? hechos + " mensaje(s) redactado(s); luego falló: " + fallo : "No se pudo redactar: " + fallo)
-    : hechos + " mensaje(s) redactado(s) por IA");
-});
-
-document.getElementById("claveIA").addEventListener("change", () => {
-  const v = document.getElementById("claveIA").value.trim();
-  if (v) localStorage.setItem(CLAVE_IA, v);
-  else localStorage.removeItem(CLAVE_IA);
-  sello(v ? "Clave guardada solo en este navegador" : "Clave retirada");
-});
-
-document.getElementById("verClave").addEventListener("click", () => {
-  const campo = document.getElementById("claveIA");
-  campo.type = campo.type === "password" ? "text" : "password";
+  sello(filas.length + " mensaje(s) redactado(s) desde la plantilla local");
 });
 
 document.getElementById("agregarCargo").addEventListener("click", () => {
@@ -3324,7 +3671,7 @@ document.getElementById("agregarCargo").addEventListener("click", () => {
   const color = PALETA.find(c => !usados.has(c)) || PALETA[estado.cargos.length % PALETA.length];
   estado.cargos.push({ id: uid(), nombre: "Cargo", color });
   guardar(); dibujar();
-  const campos = document.querySelectorAll("#gestionResponsables .cargo-nombre");
+  const campos = document.querySelectorAll("#gestionCargos .cargo-nombre");
   const nuevo = campos[campos.length - 1];
   if (nuevo) { nuevo.focus(); nuevo.select(); }
 });
@@ -3342,6 +3689,17 @@ document.getElementById("agregarFrente").addEventListener("click", () => {
   const campos = document.querySelectorAll("#gestionFrentes .fila-frente input[type='text']");
   const nuevo = campos[campos.length - 2];
   if (nuevo) { nuevo.focus(); nuevo.select(); }
+});
+
+document.getElementById("agregarInstitucion").addEventListener("click", () => {
+  if (!Array.isArray(estado.instituciones)) estado.instituciones = [];
+  const usados = new Set(estado.instituciones.map(nst => nst.color));
+  const color = PALETA.find(c => !usados.has(c)) || PALETA[estado.instituciones.length % PALETA.length];
+  estado.instituciones.push({ id: uid(), nombre: "Institución nueva", color });
+  guardar(); dibujar();
+  const campos = document.querySelectorAll("#gestionInstituciones .fila-frente input[type='text']");
+  const reciente = campos[campos.length - 1];
+  if (reciente) { reciente.focus(); reciente.select(); }
 });
 
 /* ---------------- Acciones generales ---------------- */
@@ -3463,6 +3821,9 @@ function fichaResponsable(r) {
   const cabeza = document.createElement("div");
   cabeza.className = "fila-frente";
   let filaSenas = null;
+  let filaCargos = null;
+  let filaCasas = null;
+  let filaMando = null;
 
   if (!r.cargoId) {
     const color = document.createElement("input");
@@ -3518,47 +3879,173 @@ function fichaResponsable(r) {
     correo.addEventListener("change", () => { r.correo = correo.value.trim(); guardar(); dibujar(); });
     filaSenas.appendChild(correo);
 
-    const cargoSel = document.createElement("select");
-    cargoSel.className = "resp-superior";
-    cargoSel.title = "Cargo al que pertenece; mudarse tiñe con el color del nuevo cargo";
-    const opSin = document.createElement("option");
-    opSin.value = "";
-    opSin.textContent = "— sin cargo —";
-    cargoSel.appendChild(opSin);
-    estado.cargos.forEach(c2 => {
-      const op = document.createElement("option");
-      op.value = c2.id;
-      op.textContent = c2.nombre;
-      if (r.cargoId === c2.id) op.selected = true;
-      cargoSel.appendChild(op);
+    // Cargos: chips plurales, con el primero como principal que presta color.
+    filaCargos = document.createElement("div");
+    filaCargos.className = "fila-frente resp-senas";
+    cargosDe(r).forEach(cid => {
+      const c2 = (estado.cargos || []).find(x => x.id === cid);
+      if (!c2) return;
+      const chip = document.createElement("span");
+      chip.className = "t-frente";
+      chip.style.color = claro(c2.color, 0.32);
+      chip.title = cid === cargosDe(r)[0]
+        ? "Cargo principal: presta su color a la persona"
+        : "Cargo adicional";
+      chip.appendChild(document.createTextNode(c2.nombre));
+      const quitarC = document.createElement("button");
+      quitarC.type = "button";
+      quitarC.className = "t-frente-quitar";
+      quitarC.textContent = "×";
+      quitarC.title = "Quitar este cargo a la persona";
+      quitarC.addEventListener("click", ev => {
+        ev.stopPropagation();
+        r.cargoIds = cargosDe(r).filter(x => x !== cid);
+        refrescarCargo(r);
+        guardar(); dibujar();
+      });
+      chip.appendChild(quitarC);
+      filaCargos.appendChild(chip);
     });
-    cargoSel.addEventListener("change", () => {
-      r.cargoId = cargoSel.value;
-      const c2 = estado.cargos.find(x => x.id === r.cargoId);
-      r.cargo = c2 ? c2.nombre : "";
-      if (c2) r.color = c2.color;
+    const libresC = (estado.cargos || []).filter(c2 => !tieneCargo(r, c2.id));
+    if (libresC.length) {
+      const sumarC = document.createElement("select");
+      sumarC.className = "t-frente t-frente-sumar";
+      sumarC.title = "Sumar otro cargo a esta persona";
+      const marcaC = document.createElement("option");
+      marcaC.value = "";
+      marcaC.textContent = cargosDe(r).length ? "+" : "+ cargo";
+      sumarC.appendChild(marcaC);
+      libresC.forEach(c2 => {
+        const op = document.createElement("option");
+        op.value = c2.id;
+        op.textContent = c2.nombre;
+        sumarC.appendChild(op);
+      });
+      sumarC.addEventListener("change", () => {
+        if (!sumarC.value) return;
+        r.cargoIds = cargosDe(r).concat([sumarC.value]);
+        refrescarCargo(r);
+        guardar(); dibujar();
+      });
+      filaCargos.appendChild(sumarC);
+    }
+
+    // Casas: chips plurales con la primera como principal; quitar una poda
+    // el mando que dependía de ella, pues la jerarquía exige casa común.
+    filaCasas = document.createElement("div");
+    filaCasas.className = "fila-frente resp-senas";
+
+    const autoBtn = document.createElement("button");
+    autoBtn.type = "button";
+    autoBtn.className = "lente-chip" + (r.autonomo ? " activa" : "");
+    autoBtn.textContent = "Autónomo";
+    autoBtn.title = r.autonomo
+      ? "Rasgo declarado: comparece en el bloque Autónomos aunque vista casas. Clic para quitarlo"
+      : "Marcar como autónomo: comparecerá en el bloque Autónomos sin dejar sus casas";
+    autoBtn.addEventListener("click", () => {
+      r.autonomo = !r.autonomo;
       guardar(); dibujar();
     });
-    cabeza.appendChild(cargoSel);
+    filaCasas.appendChild(autoBtn);
 
-    const superior = document.createElement("select");
-    superior.className = "resp-superior";
-    superior.title = "Relación jerárquica: ante quién responde";
-    const opNadie = document.createElement("option");
-    opNadie.value = "";
-    opNadie.textContent = "— sin superior —";
-    superior.appendChild(opNadie);
-    estado.responsables
-      .filter(x => x.id !== "nadie" && x.id !== r.id && !mandaSobre(r.id, x.id))
-      .forEach(x => {
+    instsDe(r).forEach(iid => {
+      const nst = instPorId(iid);
+      if (!nst) return;
+      const chip = document.createElement("span");
+      chip.className = "t-frente";
+      chip.style.color = claro(nst.color, 0.32);
+      chip.title = iid === instsDe(r)[0] ? "Casa principal" : "Casa adicional";
+      chip.appendChild(document.createTextNode(nst.nombre));
+      const quitarI = document.createElement("button");
+      quitarI.type = "button";
+      quitarI.className = "t-frente-quitar";
+      quitarI.textContent = "×";
+      quitarI.title = "Retirar a la persona de esta casa";
+      quitarI.addEventListener("click", ev => {
+        ev.stopPropagation();
+        r.insts = instsDe(r).filter(x => x !== iid);
+        refrescarCasa(r);
+        podarJerarquiaCruzada();
+        guardar(); dibujar();
+      });
+      chip.appendChild(quitarI);
+      filaCasas.appendChild(chip);
+    });
+    const libresI = (estado.instituciones || []).filter(nst => !instsDe(r).includes(nst.id));
+    if (libresI.length) {
+      const sumarI = document.createElement("select");
+      sumarI.className = "t-frente t-frente-sumar";
+      sumarI.title = "Sumar otra casa a esta persona";
+      const marcaI = document.createElement("option");
+      marcaI.value = "";
+      marcaI.textContent = instsDe(r).length ? "+" : "+ casa";
+      sumarI.appendChild(marcaI);
+      libresI.forEach(nst => {
+        const op = document.createElement("option");
+        op.value = nst.id;
+        op.textContent = nst.nombre;
+        sumarI.appendChild(op);
+      });
+      sumarI.addEventListener("change", () => {
+        if (!sumarI.value) return;
+        r.insts = instsDe(r).concat([sumarI.value]);
+        refrescarCasa(r);
+        guardar(); dibujar();
+      });
+      filaCasas.appendChild(sumarI);
+    }
+
+    // Mando: chips plurales de «responde a»; el grafo veda lazos circulares
+    // y cada vínculo exige casa común con el superior.
+    filaMando = document.createElement("div");
+    filaMando.className = "fila-frente resp-senas";
+    superioresDe(r).forEach(sid => {
+      const sup = (estado.responsables || []).find(x => x.id === sid);
+      if (!sup) return;
+      const chip = document.createElement("span");
+      chip.className = "t-frente";
+      chip.style.color = claro(sup.color, 0.32);
+      chip.title = "Responde ante " + sup.nombre + (sup.cargo ? " (" + sup.cargo + ")" : "");
+      chip.appendChild(document.createTextNode("responde a " + sup.nombre));
+      const quitarS = document.createElement("button");
+      quitarS.type = "button";
+      quitarS.className = "t-frente-quitar";
+      quitarS.textContent = "×";
+      quitarS.title = "Cortar este vínculo de mando";
+      quitarS.addEventListener("click", ev => {
+        ev.stopPropagation();
+        r.superiores = superioresDe(r).filter(x => x !== sid);
+        refrescarMando(r);
+        guardar(); dibujar();
+      });
+      chip.appendChild(quitarS);
+      filaMando.appendChild(chip);
+    });
+    const libresS = estado.responsables
+      .filter(x => x.id !== "nadie" && x.id !== r.id && !superioresDe(r).includes(x.id)
+        && mismaCasaJerarquica(x, r) && !mandaSobre(r.id, x.id));
+    if (libresS.length) {
+      const sumarS = document.createElement("select");
+      sumarS.className = "t-frente t-frente-sumar";
+      sumarS.title = "Sumar otro superior: solo gente con quien comparta casa y sin cerrar lazos";
+      const marcaS = document.createElement("option");
+      marcaS.value = "";
+      marcaS.textContent = superioresDe(r).length ? "+" : "+ responde a";
+      sumarS.appendChild(marcaS);
+      libresS.forEach(x => {
         const op = document.createElement("option");
         op.value = x.id;
-        op.textContent = "responde a " + x.nombre;
-        if (r.superior === x.id) op.selected = true;
-        superior.appendChild(op);
+        op.textContent = x.nombre;
+        sumarS.appendChild(op);
       });
-    superior.addEventListener("change", () => { r.superior = superior.value; guardar(); dibujar(); });
-    cabeza.appendChild(superior);
+      sumarS.addEventListener("change", () => {
+        if (!sumarS.value) return;
+        r.superiores = superioresDe(r).concat([sumarS.value]);
+        refrescarMando(r);
+        guardar(); dibujar();
+      });
+      filaMando.appendChild(sumarS);
+    }
 
     const quitar = document.createElement("button");
     quitar.className = "quitar";
@@ -3577,7 +4064,11 @@ function fichaResponsable(r) {
         estado.calendario.eventos.forEach(e => {
           e.resps = (e.resps || []).filter(x => x !== r.id);
         });
-        estado.responsables.forEach(x => { if (x.superior === r.id) x.superior = ""; });
+        estado.responsables.forEach(x => {
+          if (!superioresDe(x).includes(r.id)) return;
+          x.superiores = superioresDe(x).filter(s => s !== r.id);
+          x.superior = x.superiores[0] || "";
+        });
         estado.responsables = estado.responsables.filter(x => x.id !== r.id);
         guardar(); dibujar();
         sello("Responsable despedido: sus procesos quedan sin cargo");
@@ -3586,6 +4077,9 @@ function fichaResponsable(r) {
     cabeza.appendChild(quitar);
   }
   carta.appendChild(cabeza);
+  if (filaCasas) carta.appendChild(filaCasas);
+  if (filaCargos) carta.appendChild(filaCargos);
+  if (filaMando) carta.appendChild(filaMando);
   if (filaSenas) carta.appendChild(filaSenas);
 
   const cifras = document.createElement("div");
@@ -3602,7 +4096,7 @@ function fichaResponsable(r) {
 
   const cartasR = estado.columnas.flatMap(c => c.tarjetas.filter(t => respsDe(t).includes(r.id)).map(t => ({ t, c })));
   const eventosR = estado.calendario.eventos.filter(e => (e.resps || []).includes(r.id));
-  const entradasR = estado.bitacora.filter(b => (b.resps || []).some(x => x.id === r.id));
+  const entradasR = bitacoraLente().filter(b => (b.resps || []).some(x => x.id === r.id));
   const urgentesR = cartasR.filter(x => x.c.urgente).length;
   const avanceR = cartasR.length ? Math.round(cartasR.reduce((a, x) => a + pctDe(x.t), 0) / cartasR.length) : null;
   const tiempoR = entradasR.reduce((a, b) => a + (b.tiempoMs || 0), 0);
@@ -3617,138 +4111,88 @@ function fichaResponsable(r) {
   dato("Tiempo Σ", tiempoR ? duracionHumana(tiempoR) : "—");
   dato("Retraso x̄", rotuloRetraso(retrasoMedioR), retrasoMedioR !== null && retrasoMedioR > 60000);
   if (!fijo) {
-    const subordinados = estado.responsables.filter(x => x.superior === r.id).length;
+    const subordinados = estado.responsables.filter(x => superioresDe(x).includes(r.id)).length;
     dato("A su cargo", subordinados);
   }
   carta.appendChild(cifras);
 
-  if (!fijo && (r.contacto || r.correo || r.superior)) {
+  if (!fijo && (r.contacto || r.correo || superioresDe(r).length)) {
     const senia = document.createElement("p");
     senia.className = "resp-senia";
     const trozos = [];
     if (r.contacto) trozos.push("☎ " + r.contacto);
     if (r.correo) trozos.push("✉ " + r.correo);
-    if (r.superior) trozos.push("responde a " + respPorId(r.superior).nombre);
+    if (superioresDe(r).length) trozos.push("responde a " + superioresDe(r).map(sid => respPorId(sid).nombre).join(" y "));
     senia.textContent = trozos.join(" · ");
     carta.appendChild(senia);
   }
   return carta;
 }
 
-function bloqueDeCargo(cargo) {
-  const bloque = document.createElement("div");
-  bloque.className = "cargo-bloque";
-  bloque.style.setProperty("--acento", claro(cargo.color, 0.3));
-
-  const cabeza = document.createElement("div");
-  cabeza.className = "cargo-cabeza";
-
-  const color = document.createElement("input");
-  color.type = "color";
-  color.value = cargo.color;
-  color.title = "Color del cargo: lo visten todos sus responsables";
-  color.addEventListener("input", () => {
-    bloque.style.setProperty("--acento", claro(color.value, 0.3));
-  });
-  color.addEventListener("change", () => {
-    cargo.color = color.value;
-    estado.responsables.forEach(r => { if (r.cargoId === cargo.id) r.color = cargo.color; });
-    guardar(); dibujar();
-  });
-
-  const nombre = document.createElement("input");
-  nombre.type = "text";
-  nombre.className = "cargo-nombre";
-  nombre.value = cargo.nombre;
-  nombre.title = "Nombre del cargo";
-  nombre.addEventListener("change", () => {
-    cargo.nombre = nombre.value.trim() || "Cargo";
-    estado.responsables.forEach(r => { if (r.cargoId === cargo.id) r.cargo = cargo.nombre; });
-    guardar(); dibujar();
-  });
-
-  const gente = estado.responsables.filter(r => r.cargoId === cargo.id);
-  const censo = document.createElement("span");
-  censo.className = "cargo-censo";
-  censo.textContent = gente.length + (gente.length === 1 ? " persona" : " personas");
-
-  const sumar = document.createElement("button");
-  sumar.className = "cargo-sumar";
-  sumar.textContent = "+ Responsable";
-  sumar.title = "Dar de alta un responsable dentro de este cargo";
-  sumar.addEventListener("click", () => {
-    const i = estado.responsables.findIndex(r => r.id === "nadie");
-    const nuevoResp = { id: uid(), nombre: "Responsable", color: cargo.color, cargo: cargo.nombre, cargoId: cargo.id, contacto: "", correo: "", superior: "" };
-    estado.responsables.splice(i === -1 ? estado.responsables.length : i, 0, nuevoResp);
-    guardar(); dibujar();
-  });
-
-  const quitar = document.createElement("button");
-  quitar.className = "quitar";
-  quitar.textContent = "×";
-  quitar.title = "Eliminar el cargo (sus responsables quedan sin cargo adscrito)";
-  quitar.addEventListener("click", () => {
-    confirmar("¿Eliminar el cargo «" + cargo.nombre + "»? Sus " + gente.length + " responsable(s) quedarán sin cargo adscrito, conservando su color actual.", "Eliminar").then(ok => {
-      if (!ok) return;
-      estado.responsables.forEach(r => {
-        if (r.cargoId === cargo.id) { r.cargoId = ""; r.cargo = ""; }
-      });
-      estado.cargos = estado.cargos.filter(x => x.id !== cargo.id);
-      guardar(); dibujar();
-    });
-  });
-
-  cabeza.append(color, nombre, censo, sumar, quitar);
-  bloque.appendChild(cabeza);
-
-  const fichas = document.createElement("div");
-  fichas.className = "cargo-fichas";
-  if (gente.length) gente.forEach(r => fichas.appendChild(fichaResponsable(r)));
-  else {
-    const nada = document.createElement("p");
-    nada.className = "inf-nada";
-    nada.textContent = "Cargo sin gente todavía.";
-    fichas.appendChild(nada);
-  }
-  bloque.appendChild(fichas);
-  return bloque;
-}
-
-function dibujarResponsables() {
-  const caja = document.getElementById("gestionResponsables");
+function dibujarCargos() {
+  const caja = document.getElementById("gestionCargos");
   if (!caja) return;
   caja.innerHTML = "";
 
-  estado.cargos.forEach(cargo => caja.appendChild(bloqueDeCargo(cargo)));
+  if (!(estado.cargos || []).length) {
+    caja.innerHTML = '<p class="inf-nada">Sin cargos todavía: créalos aquí y vísteselos a la gente desde su ficha, dentro de su institución.</p>';
+    return;
+  }
 
-  // Sin cargo adscrito: los sueltos y el fijo «Sin responsable».
-  const sueltos = estado.responsables.filter(r => !r.cargoId);
-  const bloque = document.createElement("div");
-  bloque.className = "cargo-bloque sin-cargo";
-  const cabeza = document.createElement("div");
-  cabeza.className = "cargo-cabeza";
-  const rotulo = document.createElement("span");
-  rotulo.className = "cargo-nombre-fijo";
-  rotulo.textContent = "Sin cargo adscrito";
-  const sumar = document.createElement("button");
-  sumar.className = "cargo-sumar";
-  sumar.textContent = "+ Responsable";
-  sumar.title = "Dar de alta un responsable sin cargo";
-  sumar.addEventListener("click", () => {
-    const usados = new Set(estado.responsables.map(r => r.color));
-    const color = PALETA.find(c => !usados.has(c)) || PALETA[estado.responsables.length % PALETA.length];
-    const i = estado.responsables.findIndex(r => r.id === "nadie");
-    const nuevoResp = { id: uid(), nombre: "Responsable", color, cargo: "", cargoId: "", contacto: "", correo: "", superior: "" };
-    estado.responsables.splice(i === -1 ? estado.responsables.length : i, 0, nuevoResp);
-    guardar(); dibujar();
+  estado.cargos.forEach(cargo => {
+    const bloque = document.createElement("div");
+    bloque.className = "cargo-bloque";
+    bloque.style.setProperty("--acento", claro(cargo.color, 0.3));
+
+    const cabeza = document.createElement("div");
+    cabeza.className = "cargo-cabeza";
+
+    const color = document.createElement("input");
+    color.type = "color";
+    color.value = cargo.color;
+    color.title = "Color del cargo: lo visten todos los suyos";
+    color.addEventListener("input", () => {
+      bloque.style.setProperty("--acento", claro(color.value, 0.3));
+    });
+    color.addEventListener("change", () => {
+      cargo.color = color.value;
+      estado.responsables.forEach(r => { if (cargosDe(r)[0] === cargo.id) r.color = cargo.color; });
+      guardar(); dibujar();
+    });
+
+    const nombre = document.createElement("input");
+    nombre.type = "text";
+    nombre.className = "cargo-nombre";
+    nombre.value = cargo.nombre;
+    nombre.title = "Nombre del cargo";
+    nombre.addEventListener("change", () => {
+      cargo.nombre = nombre.value.trim() || "Cargo";
+      estado.responsables.forEach(r => { if (tieneCargo(r, cargo.id)) refrescarCargo(r); });
+      guardar(); dibujar();
+    });
+
+    const gente = estado.responsables.filter(r => tieneCargo(r, cargo.id));
+    const censo = document.createElement("span");
+    censo.className = "cargo-censo";
+    censo.textContent = gente.length + (gente.length === 1 ? " persona" : " personas");
+
+    const quitar = document.createElement("button");
+    quitar.className = "quitar";
+    quitar.textContent = "×";
+    quitar.title = "Eliminar el cargo (sus responsables quedan sin cargo adscrito)";
+    quitar.addEventListener("click", () => {
+      confirmar("¿Eliminar el cargo «" + cargo.nombre + "»? Sus " + gente.length + " responsable(s) lo perderán, conservando sus demás cargos y su color vigente.", "Eliminar").then(ok => {
+        if (!ok) return;
+        estado.cargos = estado.cargos.filter(x => x.id !== cargo.id);
+        estado.responsables.forEach(r => { if (tieneCargo(r, cargo.id)) refrescarCargo(r); });
+        guardar(); dibujar();
+      });
+    });
+
+    cabeza.append(color, nombre, censo, quitar);
+    bloque.appendChild(cabeza);
+    caja.appendChild(bloque);
   });
-  cabeza.append(rotulo, sumar);
-  bloque.appendChild(cabeza);
-  const fichas = document.createElement("div");
-  fichas.className = "cargo-fichas";
-  sueltos.forEach(r => fichas.appendChild(fichaResponsable(r)));
-  bloque.appendChild(fichas);
-  caja.appendChild(bloque);
 }
 
 /* ---------------- Informe del proyecto ---------------- */
@@ -3763,11 +4207,11 @@ function dibujarInforme() {
   const hoyIsoTxt = hoyISO();
 
   /* ----- Cosecha ----- */
-  const activas = estado.columnas.flatMap(c => c.tarjetas.map(t => ({ t, c })));
+  const activas = estado.columnas.flatMap(c => tarjetasLente(c).map(t => ({ t, c })));
   const nActivas = activas.length;
   const avanceGlobal = nActivas ? Math.round(activas.reduce((a, x) => a + pctDe(x.t), 0) / nActivas) : null;
   const urgCol = estado.columnas.find(c => c.urgente);
-  const nUrgentes = urgCol ? urgCol.tarjetas.length : 0;
+  const nUrgentes = urgCol ? tarjetasLente(urgCol).length : 0;
   const atrasadas = activas.filter(x => x.t.corte && diasAlCorte(x.t.corte) < 0).length;
   const porBrillar = activas.filter(x => {
     if (completa(x.t)) return false;
@@ -3776,9 +4220,9 @@ function dibujarInforme() {
     return false;
   }).length;
   const entregablesDeuda = activas.filter(x => x.t.exigeEntrega && !(x.t.entrega && x.t.entrega.nombre)).length;
-  const cerradas = estado.bitacora.length;
-  const tiempoTotal = estado.bitacora.reduce((a, b) => a + (b.tiempoMs || 0), 0);
-  const retrasos = estado.bitacora.map(b => b.retrasoMs).filter(v => v !== null && v !== undefined);
+  const cerradas = bitacoraLente().length;
+  const tiempoTotal = bitacoraLente().reduce((a, b) => a + (b.tiempoMs || 0), 0);
+  const retrasos = bitacoraLente().map(b => b.retrasoMs).filter(v => v !== null && v !== undefined);
   const retrasoNeto = retrasos.reduce((a, v) => a + v, 0);
   const aTiempo = retrasos.filter(v => v <= 60000).length;
 
@@ -3838,10 +4282,11 @@ function dibujarInforme() {
   const secFlujo = seccion("Flujo del tablero");
   const barrasFlujo = document.createElement("div");
   barrasFlujo.className = "inf-barras";
-  const maxCol = Math.max(1, ...estado.columnas.map(c => c.tarjetas.length));
+  const maxCol = Math.max(1, ...estado.columnas.map(c => tarjetasLente(c).length));
   estado.columnas.forEach(c => {
-    const nT = c.tarjetas.length;
-    const media = nT ? Math.round(c.tarjetas.reduce((a, t) => a + pctDe(t), 0) / nT) : 0;
+    const deLente = tarjetasLente(c);
+    const nT = deLente.length;
+    const media = nT ? Math.round(deLente.reduce((a, t) => a + pctDe(t), 0) / nT) : 0;
     barra(barrasFlujo, c.nombre + (c.ciclica ? " ⟳" : ""), nT, maxCol, claro(c.acento, 0.28), nT + " · " + media + "%");
   });
   secFlujo.appendChild(barrasFlujo);
@@ -3856,7 +4301,7 @@ function dibujarInforme() {
     const tb = document.createElement("tbody");
     conDatos
       .map(x => {
-        const entradasF = estado.bitacora.filter(b => b.frentes.some(y => y.id === x.f.id));
+        const entradasF = bitacoraLente().filter(b => b.frentes.some(y => y.id === x.f.id));
         const tiempoF = entradasF.reduce((a, b) => a + (b.tiempoMs || 0), 0);
         const rs = entradasF.map(b => b.retrasoMs).filter(v => v !== null && v !== undefined);
         const rMedio = rs.length ? rs.reduce((a, v) => a + v, 0) / rs.length : null;
@@ -3953,7 +4398,7 @@ function dibujarInforme() {
       const d = new Date(hoy.getFullYear(), hoy.getMonth() - k, 1);
       meses.push({ mm: d.getMonth() + 1, aa: d.getFullYear(), n: 0 });
     }
-    estado.bitacora.forEach(b => {
+    bitacoraLente().forEach(b => {
       const m = /^(\d{1,2})-(\d{1,2})-(\d{4})$/.exec(b.cierre || "");
       if (!m) return;
       const celda = meses.find(x => x.mm === Number(m[2]) && x.aa === Number(m[3]));
@@ -3981,7 +4426,7 @@ function dibujarInforme() {
   const secAgenda = seccion("Carga semanal de la agenda");
   const lunes = new Date(hoy.getFullYear(), hoy.getMonth(), hoy.getDate() - ((hoy.getDay() + 6) % 7));
   const cargaDia = [0, 0, 0, 0, 0, 0, 0];
-  estado.horario.grupos.forEach(g => g.bloques.forEach(b => {
+  estado.horario.grupos.filter(pasaLente).forEach(g => g.bloques.forEach(b => {
     const i = minutos(b.inicio), f = minutos(b.fin);
     if (i == null || f == null || f <= i) return;
     cargaDia[b.dia - 1] += f - i;
@@ -3990,7 +4435,7 @@ function dibujarInforme() {
     const diaF = new Date(lunes.getFullYear(), lunes.getMonth(), lunes.getDate() + d - 1);
     const iso = diaF.getFullYear() + "-" + String(diaF.getMonth() + 1).padStart(2, "0") + "-" + String(diaF.getDate()).padStart(2, "0");
     estado.calendario.eventos.forEach(e => {
-      if (!ocurreEn(e, iso)) return;
+      if (!ocurreEn(e, iso) || !pasaLente(e)) return;
       const i = minutos(e.hora || "");
       if (i == null) { cargaDia[d - 1] += 60; return; }
       let f = minutos(e.fin);
@@ -4044,7 +4489,6 @@ function dibujarInforme() {
 
 /* ---------------- Avisos a responsables ---------------- */
 
-const CLAVE_IA = "tablero.claveIA.v1";
 
 // Filas de la tabla: toda tarea inconclusa con su cuadro de situación.
 function filasAviso() {
@@ -4052,7 +4496,7 @@ function filasAviso() {
   hoy.setHours(0, 0, 0, 0);
   const filas = [];
   estado.columnas.forEach(col => col.tarjetas.forEach(t => {
-    if (completa(t)) return;
+    if (!pasaLente(t) || completa(t)) return;
     const partes = [];
     partes.push("avance " + pctDe(t) + "%" + (t.pasos.length ? " (" + t.pasos.filter(x => x.hecho).length + "/" + t.pasos.length + " etapas)" : ""));
     if (t.corte) {
@@ -4082,8 +4526,6 @@ function filasAviso() {
 function dibujarAvisos() {
   const cuerpo = document.getElementById("avisosCuerpo");
   if (!cuerpo) return;
-  const clave = document.getElementById("claveIA");
-  if (clave && !clave.value) clave.value = localStorage.getItem(CLAVE_IA) || "";
   cuerpo.innerHTML = "";
 
   const filas = filasAviso();
@@ -4150,7 +4592,7 @@ function dibujarAvisos() {
     tdM.className = "aviso-mensaje";
     const area = document.createElement("textarea");
     area.value = estado.avisos[t.id] || "";
-    area.placeholder = "Aún sin mensaje: redáctalo o pídeselo a la IA";
+    area.placeholder = "Aún sin mensaje: escríbelo o usa la plantilla";
     area.addEventListener("change", () => {
       if (area.value.trim()) estado.avisos[t.id] = area.value;
       else delete estado.avisos[t.id];
@@ -4161,11 +4603,11 @@ function dibujarAvisos() {
     const acciones = document.createElement("div");
     acciones.className = "aviso-acciones";
 
-    const ia = document.createElement("button");
-    ia.textContent = "✎ IA";
-    ia.title = "Redactar (o rehacer) este mensaje con IA";
-    ia.addEventListener("click", () => redactarAviso(fila, area, ia));
-    acciones.appendChild(ia);
+    const redactor = document.createElement("button");
+    redactor.textContent = "✎ Redactar";
+    redactor.title = "Redactar (o rehacer) este mensaje desde la plantilla local";
+    redactor.addEventListener("click", () => redactarAviso(fila, area));
+    acciones.appendChild(redactor);
 
     const copiar = document.createElement("button");
     copiar.textContent = "⧉ Copiar";
@@ -4204,60 +4646,41 @@ function dibujarAvisos() {
   cuerpo.appendChild(tabla);
 }
 
-// La llamada al modelo: directa desde el navegador, con la clave local.
-async function llamarIA(prompt) {
-  const clave = (document.getElementById("claveIA").value || "").trim();
-  if (!clave) throw new Error("Falta la clave API: ingrésala en el campo superior");
-  const r = await fetch("https://api.anthropic.com/v1/messages", {
-    method: "POST",
-    headers: {
-      "content-type": "application/json",
-      "x-api-key": clave,
-      "anthropic-version": "2023-06-01",
-      "anthropic-dangerous-direct-browser-access": "true"
-    },
-    body: JSON.stringify({
-      model: "claude-sonnet-4-5",
-      max_tokens: 400,
-      messages: [{ role: "user", content: prompt }]
-    })
-  });
-  if (!r.ok) {
-    const detalle = r.status === 401 ? "clave rechazada" : r.status === 429 ? "límite de uso alcanzado" : "HTTP " + r.status;
-    throw new Error("La API respondió con error (" + detalle + ")");
-  }
-  const dato = await r.json();
-  return (dato.content || []).filter(b => b.type === "text").map(b => b.text).join("\n").trim();
-}
 
-function promptAviso(fila) {
+
+// La redacción es local y determinista: el mensaje nace de los datos de la
+// propia fila (nombres, avance, etapas, plazo) y del firmante del tablero.
+function plantillaAviso(fila) {
   const t = fila.t;
-  const nombres = fila.resps.map(r => r.nombre + (r.cargo ? " (" + r.cargo + ")" : "")).join(" y ") || "el responsable";
+  const nombres = fila.resps.map(rr => rr.nombre).join(" y ");
   const firmante = estado.usuario || "la coordinación del proyecto";
-  return "Redacta en español, en tono cordial y profesional, un mensaje breve (3 a 5 oraciones, sin asunto ni encabezados) "
-    + "para notificar a " + nombres + " sobre una tarea pendiente a su cargo. "
-    + "Datos de la tarea: título «" + (t.titulo || "sin título") + "»; situación: " + fila.info + ". "
-    + "El mensaje debe saludar por su nombre, recordar concretamente qué falta y su plazo si lo hay, "
-    + "ofrecer apoyo y despedirse de parte de " + firmante + ". Responde únicamente con el mensaje.";
+  const partes = [];
+  partes.push("Estimado(s) " + (nombres || "quien corresponda") + ":");
+  partes.push("");
+  partes.push("Le escribo para recordarle la tarea pendiente «" + (t.titulo || "sin título") + "», que figura a su cargo"
+    + (t.pasos.length ? " con " + t.pasos.filter(p => p.hecho).length + " de " + t.pasos.length + " etapas cumplidas (" + pctDe(t) + "% de avance)." : " con " + pctDe(t) + "% de avance."));
+  if (t.corte) {
+    const d = diasAlCorte(t.corte);
+    partes.push(d < 0
+      ? "Su fecha de corte (" + t.corte + ") venció hace " + (-d) + " día(s), por lo que agradecería priorizarla."
+      : d === 0
+        ? "Su fecha de corte es hoy (" + t.corte + "), por lo que agradecería priorizarla."
+        : "Su fecha de corte es el " + t.corte + ", en " + d + " día(s).");
+  }
+  if (t.cuerpo) partes.push("Contexto: " + t.cuerpo);
+  partes.push("Quedo a disposición para destrabar lo que haga falta.");
+  partes.push("");
+  partes.push("Saludos cordiales,");
+  partes.push(firmante);
+  return partes.join("\n");
 }
 
-async function redactarAviso(fila, area, boton) {
-  boton.disabled = true;
-  area.classList.add("aviso-espera");
-  const previo = area.placeholder;
-  area.placeholder = "Redactando…";
-  try {
-    const texto = await llamarIA(promptAviso(fila));
-    area.value = texto;
-    estado.avisos[fila.t.id] = texto;
-    guardar();
-    sello("Mensaje redactado por IA");
-  } catch (err) {
-    sello("No se pudo redactar: " + err.message);
-  }
-  area.classList.remove("aviso-espera");
-  area.placeholder = previo;
-  boton.disabled = false;
+function redactarAviso(fila, area) {
+  const texto = plantillaAviso(fila);
+  area.value = texto;
+  estado.avisos[fila.t.id] = texto;
+  guardar();
+  sello("Mensaje redactado desde la plantilla local");
 }
 
 /* ---------------- Bitácora de procesos terminados ---------------- */
@@ -4289,7 +4712,7 @@ function dibujarBitacora() {
   if (!lista) return;
   lista.innerHTML = "";
 
-  if (!estado.bitacora.length) {
+  if (!bitacoraLente().length) {
     lista.innerHTML = '<p class="bit-vacio">Aún nada que contar: cuando declares finalizado un proceso del tablero, su crónica se asentará aquí.</p>';
     return;
   }
@@ -4313,7 +4736,7 @@ function dibujarBitacora() {
   });
   lista.appendChild(orden);
 
-  const entradas = estado.bitacora.slice().sort((a, b) => {
+  const entradas = bitacoraLente().slice().sort((a, b) => {
     const c = ordenBitacora.campo;
     const va = a[c], vb = b[c];
     const naVal = va === null || va === undefined;
@@ -4636,7 +5059,8 @@ function dibujarGantt() {
 
   let hayTarjetas = false;
   estado.columnas.forEach(col => {
-    if (!col.tarjetas.length) return;
+    const enLente = tarjetasLente(col);
+    if (!enLente.length) return;
     hayTarjetas = true;
 
     const rotG = document.createElement("div");
@@ -4645,7 +5069,7 @@ function dibujarGantt() {
     rotG.textContent = col.nombre + (col.ciclica ? " ⟳" : "");
     agregarFila(ALTO_GRUPO, rotG, null);
 
-    col.tarjetas.forEach(t => {
+    enLente.forEach(t => {
       const rot = document.createElement("div");
       rot.className = "gantt-rotulo";
       frentesDe(t).slice(0, 3).forEach(fid => {
@@ -4692,7 +5116,7 @@ function dibujarGantt() {
   });
 
   // La bitácora: procesos terminados, barras tenues con su cierre por remate.
-  const cerradosCarta = estado.bitacora.map(b => {
+  const cerradosCarta = bitacoraLente().map(b => {
     const finB = fechaDeCierre(b.cierre);
     if (!finB || finB < iniAnio || finB > finAnio) return null;
     let iniB = fechaDeHito(b.fechaHito, anio);
@@ -4747,6 +5171,7 @@ function dibujarGantt() {
   const eventosCarta = [];
   const gruposVistos = new Set();
   estado.calendario.eventos.forEach(e => {
+    if (!pasaLente(e)) return;
     if (e.grupo) {
       if (gruposVistos.has(e.grupo)) return;
       gruposVistos.add(e.grupo);
@@ -5061,7 +5486,7 @@ function dibujarHorario() {
   ocultarNube();
 
   const bloques = [];
-  estado.horario.grupos.forEach(g => g.bloques.forEach(b => {
+  estado.horario.grupos.filter(pasaLente).forEach(g => g.bloques.forEach(b => {
     const i = minutos(b.inicio), f = minutos(b.fin);
     if (i == null || f == null || f <= i) return;
     bloques.push({ dia: b.dia, inicio: b.inicio, fin: b.fin, lugar: b.lugar, i, f, nombre: g.nombre, color: g.color, descripcion: "" });
@@ -5074,7 +5499,7 @@ function dibujarHorario() {
     const dia = new Date(lunes.getFullYear(), lunes.getMonth(), lunes.getDate() + d - 1);
     const iso = dia.getFullYear() + "-" + String(dia.getMonth() + 1).padStart(2, "0") + "-" + String(dia.getDate()).padStart(2, "0");
     estado.calendario.eventos.forEach(e => {
-      if (!ocurreEn(e, iso)) return;
+      if (!ocurreEn(e, iso) || !pasaLente(e)) return;
       const ini = e.hora || "09:00";
       const i = minutos(ini);
       if (i == null) return;
@@ -5403,7 +5828,7 @@ function difDias(desde, hasta) {
 }
 
 function clonEvento(e) {
-  return { id: uid(), fecha: e.fecha, hora: e.hora, fin: e.fin, titulo: e.titulo, lugar: e.lugar, descripcion: e.descripcion, color: e.color, repetirHasta: e.repetirHasta, grupo: e.grupo, dia: e.dia, frentes: (e.frentes || []).slice(), resps: (e.resps || []).slice() };
+  return { id: uid(), fecha: e.fecha, hora: e.hora, fin: e.fin, titulo: e.titulo, lugar: e.lugar, descripcion: e.descripcion, color: e.color, repetirHasta: e.repetirHasta, grupo: e.grupo, dia: e.dia, inst: e.inst || "", frentes: (e.frentes || []).slice(), resps: (e.resps || []).slice() };
 }
 
 // Escinde la serie alrededor de la ocurrencia D y devuelve el tramo a editar;
@@ -5538,7 +5963,7 @@ function pedirAlcance(verbo, e) {
 
 function eventosDe(fecha) {
   return estado.calendario.eventos
-    .filter(e => ocurreEn(e, fecha))
+    .filter(e => ocurreEn(e, fecha) && pasaLente(e))
     .sort((a, b) => (a.hora || "99:99").localeCompare(b.hora || "99:99"));
 }
 
@@ -5576,7 +6001,7 @@ function dibujarCalendario() {
   for (let dm = 1; dm <= diasMes; dm++) {
     const fdm = mesVista() + "-" + String(dm).padStart(2, "0");
     let cuantos = 0;
-    estado.calendario.eventos.forEach(e => { if (ocurreEn(e, fdm)) cuantos++; });
+    estado.calendario.eventos.forEach(e => { if (ocurreEn(e, fdm) && pasaLente(e)) cuantos++; });
     if (cuantos) conteos[fdm] = cuantos;
   }
 
@@ -5584,7 +6009,7 @@ function dibujarCalendario() {
   const hitosISO = {}, hitosDM = {};
   estado.columnas.forEach(col => {
     const tono = claro(col.acento, 0.3);
-    col.tarjetas.forEach(t => {
+    tarjetasLente(col).forEach(t => {
       const rotulo = t.titulo || "(sin título)";
       if (/^\d{4}-\d{2}-\d{2}$/.test(t.corte || "")) {
         (hitosISO[t.corte] = hitosISO[t.corte] || []).push({ t, col, tono, tipo: "corte", rotulo: rotulo + " (corte)" });
@@ -6467,7 +6892,7 @@ document.getElementById("veloSesiones").addEventListener("click", e => {
 
 /* ---------------- Pestañas ---------------- */
 
-const VISTAS = ["tablero", "horario", "calendario", "frentes", "responsables", "desempeno", "gantt", "bitacora", "informe", "avisos"];
+const VISTAS = ["tablero", "horario", "calendario", "frentes", "desempeno", "gantt", "bitacora", "informe", "avisos"];
 
 function verPestana(cual) {
   estado.pestana = VISTAS.includes(cual) ? cual : "tablero";
@@ -6478,7 +6903,6 @@ function verPestana(cual) {
   document.getElementById("tabHorario").classList.toggle("activa", estado.pestana === "horario");
   document.getElementById("tabCalendario").classList.toggle("activa", estado.pestana === "calendario");
   document.getElementById("tabFrentes").classList.toggle("activa", estado.pestana === "frentes");
-  document.getElementById("tabResponsables").classList.toggle("activa", estado.pestana === "responsables");
   document.getElementById("tabDesempeno").classList.toggle("activa", estado.pestana === "desempeno");
   document.getElementById("tabGantt").classList.toggle("activa", estado.pestana === "gantt");
   document.getElementById("tabBitacora").classList.toggle("activa", estado.pestana === "bitacora");
@@ -6492,7 +6916,6 @@ document.getElementById("tabTablero").addEventListener("click", () => verPestana
 document.getElementById("tabHorario").addEventListener("click", () => verPestana("horario"));
 document.getElementById("tabCalendario").addEventListener("click", () => verPestana("calendario"));
 document.getElementById("tabFrentes").addEventListener("click", () => verPestana("frentes"));
-document.getElementById("tabResponsables").addEventListener("click", () => verPestana("responsables"));
 document.getElementById("tabDesempeno").addEventListener("click", () => verPestana("desempeno"));
 document.getElementById("tabGantt").addEventListener("click", () => verPestana("gantt"));
 document.getElementById("tabBitacora").addEventListener("click", () => verPestana("bitacora"));
@@ -6526,11 +6949,9 @@ const TUTORIALES = {
     { sel: ".gf-tarjeta", titulo: "La ficha", texto: "Nombre y color editables, y las cifras del frente: activas, cerradas de la bitácora, críticas en urgencia, atrasadas de corte, avance medio, reincidencias cíclicas, tiempo total invertido y retraso medio de sus cierres. La nota de 0 a 10 pondera avance (45%), completitud histórica (30%) y salud (25%), mermada por críticas, atrasos y reincidencias." },
     { sel: ".gf-tarjeta .quitar", titulo: "Eliminar con destino", texto: "Si el frente aún tiene tareas, la ventana ofrece cancelar, borrarlas con él (las multifrente solo pierden la etiqueta), reasignarlas a otro frente o derivarlas a huérfanas; toda tarea activa reasignada pasa a la columna Urgente y la bitácora conserva su crónica intacta." },
     { sel: ".gf-marco .agregar-frente", titulo: "Agregar frente", texto: "El nuevo entra antes del frente fijo de huérfanas, que recibe las tareas de los frentes eliminados y no puede borrarse." }
-  ],
-  responsables: [
-    { sel: null, titulo: "Los responsables", texto: "Primero el cargo, luego sus gentes: cada cargo se crea con nombre y color propios, y dentro de él se dan de alta los responsables, que visten el color del cargo, pueden mudarse de uno a otro con su selector, o vivir sueltos en «Sin cargo adscrito» con color propio. Se asignan a tarjetas y eventos con el sumador «+◇» (uno o varios por proceso), viajan con duplicados y derivaciones a urgencia, y quedan asentados con su cargo en la bitácora al declarar el cierre." },
-    { sel: ".cargo-bloque", titulo: "El cargo y sus fichas", texto: "La cabecera del cargo edita nombre y color (que tiñe a todos los suyos) y da de alta responsables dentro; cada ficha lleva nombre, teléfono, correo electrónico, el selector de cargo para mudarse y la relación jerárquica «responde a», que teje el organigrama vedando los lazos circulares. Las cifras acumulan carga viva, urgencias, avance medio, eventos, cierres con su tiempo total y retraso medio, y cuántos le responden. Eliminar un cargo deja a los suyos sin cargo adscrito; despedir a alguien retira su nombre de tarjetas y eventos, mas la crónica ya escrita lo recuerda." },
-    { sel: ".gf-marco .agregar-frente", titulo: "Agregar cargo", texto: "El alta comienza aquí: creado el cargo, su botón «+ Responsable» puebla sus filas; el fijo «Sin responsable» solo comparece en los procesos que nadie ha tomado y no puede despedirse." }
+,
+    { sel: "#gestionInstituciones .cargo-bloque", titulo: "Las instituciones y su gente", texto: "Cada casa incrusta las fichas completas de los suyos: nombre, teléfono, correo, sus chips de cargos (varios por persona, con «+» y ×; el primero presta color), sus chips de casas (también plurales, con el conmutador «Autónomo» al frente; retirar una casa poda el mando que dependía de ella) y los chips «responde a» que tejen el organigrama: uno o varios superiores por persona, siempre con casa común de por medio y con los lazos circulares vedados. «+ Agregar persona» da de alta gente ya adscrita (y autónoma de nacimiento si nace en su bloque), y el bloque fijo «Autónomos» reúne a los del rasgo declarado y a quienes no pertenecen a institución alguna, junto al fijo «Sin responsable»; el autónomo con casas comparece en varios bloques como una sola ficha repetida." },
+    { sel: "#gestionCargos", titulo: "Los cargos", texto: "El cargo se crea aquí con nombre y color; cada persona puede vestir varios a la vez desde su ficha, mediante chips con «+» y ×, y el primero le presta su color. Eliminar un cargo lo retira de quienes lo llevan, sin tocar sus demás cargos." }
   ],
   desempeno: [
     { sel: null, titulo: "El desempeño", texto: "La vista de conjunto: cada frente con datos aporta su nota de 0 a 10 y el promedio general encabeza la escena." },
@@ -6542,7 +6963,7 @@ const TUTORIALES = {
     { sel: ".gantt-cuerpo", titulo: "Tramos y enlaces", texto: "Cada barra es una tarjeta agrupada por columna, del hito de partida al corte de llegada, rellena según su avance y teñida por sus frentes; las rayadas son cíclicas y corren hasta su próximo corte, las punteadas carecen de fechas declaradas. Los hilos ámbar trazan los prerrequisitos y la línea azul discontinua señala el hoy. Al pie, la bitácora tiende sus procesos terminados en barras tenues rematadas en su cierre, y los eventos del calendario sus barras delgadas de tiempo comprometido (⟳ series sobre su intervalo, • puntuales en su día), sin contar como tareas." }
   ],
   avisos: [
-    { sel: null, titulo: "Los avisos", texto: "El puente entre lo pendiente y quien debe atenderlo: la tabla reúne cada tarea inconclusa con su información asociada, su responsable y sus señas de contacto. «Reunir información» la refresca desde el estado vivo, y «Redactar con IA» compone los mensajes vacantes mediante la API de Anthropic con la clave que guardes abajo (vive solo en este navegador y no viaja en los Recuerdos). Cada mensaje es un borrador editable que persiste con el tablero, se copia de un clic y, cuando hay correo, se despacha con ✉ directo al buzón del responsable." }
+    { sel: null, titulo: "Los avisos", texto: "El puente entre lo pendiente y quien debe atenderlo: la tabla reúne cada tarea inconclusa con su información asociada, su responsable y sus señas de contacto. «Reunir información» la refresca desde el estado vivo, y «Redactar vacantes» compone localmente los mensajes que estén vacíos, con los datos de la propia fila: saludo por nombre, tarea, avance, plazo y despedida del firmante. Cada mensaje es un borrador editable que persiste con el tablero, se copia de un clic y, cuando hay correo, se despacha con ✉ directo al buzón del responsable." }
   ],
   bitacora: [
     { sel: null, titulo: "La bitácora", texto: "Crónica de lo terminado en tabla de cuatro columnas: N° correlativo e inmutable, el registro completo en prosa (quién dio término, con cada etapa y sus horas de creación y culminación), el Tiempo invertido de la primera etapa al último hecho, y el Retraso frente a la fecha esperada de cierre, rojo lo perdido y verde lo ganado. Los botones superiores reordenan por N°, Tiempo o Retraso en ambos sentidos. Al culminar una tarjeta el tablero pregunta si declararla finalizada: aceptar la asienta aquí y la saca del tablero; declinar desanda el último paso y el proceso sigue abierto." }
